@@ -42,22 +42,29 @@ rule read =
     | int_rexp      { NUM (int_of_string (Lexing.lexeme lexbuf)) }
     | '('           { L_PAREN }
     | ')'           { R_PAREN }
-    | '-'           { MINUS }
     | '='           { EQUAL }
     | ','           { COMMA }
     | ';'           { SEMICOLEN }
-    | "let"         { LET }
-    | "in"          { IN }
+    | ':'           { COLEN }
+    | '{'           { L_BIG_PAREN }
+    | '}'           { R_BIG_PAREN }
     | "if"          { IF }
-    | "then"        { THEN }
     | "else"        { ELSE }
-    | "begin"       { BEGIN }
-    | "end"         { END }
-    | "setref"      { SETREF }
-    | "deref"       { DEREF }
-    | "newref"      { NEWREF }
-    | "proc"        { PROC }
-    | "zero?"       { IS_ZERO }
+    | "while"       { WHILE }
+    | "add"         { ADD }
+    | "sub"         { SUB }
+    | "mul"         { MUL }
+    | "div"         { DIV }
+    | "and"         { AND }
+    | "or"          { OR }
+    | "lt"          { LT }
+    | "pass"        { PASS } 
+    | "print"       { PRINT }
+    | "true"        { TRUE }
+    | "false"       { FALSE }
+    | "int"         { INT_TY }
+    | "bool"        { BOOL_TY }
+    | "void"        { VOID_TY }
     | id_rexp       { ID (Lexing.lexeme lexbuf) }
     | _             { raise (LexerError ("Oops!!! Lexer error with Char: " ^ (Lexing.lexeme lexbuf)
                                           ^ " at " ^ (error_info lexbuf))) }
