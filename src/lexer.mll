@@ -45,7 +45,7 @@ rule read =
     | '='           { EQUAL }
     | ','           { COMMA }
     | ';'           { SEMICOLEN }
-    | ':'           { COLEN }
+    | ':'           { COLON }
     | '{'           { L_BIG_PAREN }
     | '}'           { R_BIG_PAREN }
     | "if"          { IF }

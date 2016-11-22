@@ -14,7 +14,7 @@ type expression =
   | Mul_exp         of expression * expression
   | Div_exp         of expression * expression
   | Var_exp         of string
-  | Call_exp        of expression * expression list
+  | Call_exp        of string * expression list
 
 type statement =
   | Empty_stat    

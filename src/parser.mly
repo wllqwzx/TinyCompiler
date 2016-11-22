@@ -43,7 +43,7 @@ nt_program:
 
 nt_func_def:
     | ty = nt_type; ast1 = ID; L_PAREN; paramlist = separated_list(COMMA, nt_aparam) ;R_PAREN; L_BIG_PAREN; statlist = separated_list (SEMICOLEN, nt_stat); R_BIG_PAREN
-                                    {Ast.A_func (ty, ast1, paramlist, statlist, )}
+                                    {Ast.A_func (ty, ast1, paramlist, statlist)}
 
 nt_type:
     | INT_TY                        {Ast.Int_ty}
@@ -58,10 +58,10 @@ nt_stat:
     | ast = nt_exp                  {Ast.Exp_stat ast}
     | ty = nt_type; str = ID; EQUAL; ast = nt_exp
                                     {Ast.Var_def_stat (ty, str, ast)}
-    | std = ID; EQUAL; ast = nt_exp {Ast.Var_set_stat (str, ast)}
-    | IF; L_PAREN; ast1 = nt_exp; R_PAREN; L_BIG_PAREN; ast2 = separated_list(SEMICOLEN; nt_stat); R_BIG_PAREN; ELSE; L_BIG_PAREN; ast3 = separated_list(SEMICOLEN; nt_stat); R_BIG_PAREN
-                                    {Ast.If_exp (ast1, ast2, ast3)}
-    | WHILE; L_PAREN; ast1 = nt_exp; R_PAREN; L_BIG_PAREN; ast2 = separated_list(SEMICOLEN; nt_stat); R_BIG_PAREN
+    | str = ID; EQUAL; ast = nt_exp {Ast.Var_set_stat (str, ast)}
+    | IF; L_PAREN; ast1 = nt_exp; R_PAREN; L_BIG_PAREN; ast2 = separated_list (SEMICOLEN, nt_stat); R_BIG_PAREN; ELSE; L_BIG_PAREN; ast3 = separated_list(SEMICOLEN, nt_stat); R_BIG_PAREN
+                                    {Ast.If_stat (ast1, ast2, ast3)}
+    | WHILE; L_PAREN; ast1 = nt_exp; R_PAREN; L_BIG_PAREN; ast2 = separated_list (SEMICOLEN, nt_stat); R_BIG_PAREN
                                     {Ast.While_stat (ast1, ast2)}
     | PRINT; L_PAREN; ast = nt_exp; R_PAREN
                                     {Ast.Print_stat ast} 
