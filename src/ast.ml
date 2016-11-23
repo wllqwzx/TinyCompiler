@@ -17,7 +17,7 @@ type expression =
   | Call_exp        of string * expression list
 
 type statement =
-  | Empty_stat    
+  | Empty_stat
   | Exp_stat      of expression  
   | Var_def_stat  of basetype * string * expression
   | Var_set_stat  of string * expression 
@@ -30,6 +30,6 @@ type param =
 
 type function_def = 
   | A_func of basetype * string * param list * statement list
-  
+
 type program =
   | A_program of function_def list
