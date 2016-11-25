@@ -11,7 +11,6 @@
 %token IF
 %token ELSE
 %token WHILE
-%token PASS
 %token AND
 %token OR
 %token LT
@@ -22,10 +21,10 @@
 %token PRINT
 %token TRUE
 %token FALSE
+%token RETURN
 
 %token INT_TY
 %token BOOL_TY
-%token VOID_TY
 
 %token <int>NUM
 %token <string>ID
@@ -48,13 +47,11 @@ nt_func_def:
 nt_type:
     | INT_TY                        {Ast.Int_ty}
     | BOOL_TY                       {Ast.Bool_ty}
-    | VOID_TY                       {Ast.Unit_ty}
 
 nt_aparam:
     | str = ID; COLON; ty = nt_type {Ast.A_param (str, ty)}
 
 nt_stat:
-    | PASS                          {Ast.Empty_stat}
     | ast = nt_exp                  {Ast.Exp_stat ast}
     | ty = nt_type; str = ID; EQUAL; ast = nt_exp
                                     {Ast.Var_def_stat (ty, str, ast)}
@@ -65,6 +62,7 @@ nt_stat:
                                     {Ast.While_stat (ast1, ast2)}
     | PRINT; L_PAREN; ast = nt_exp; R_PAREN
                                     {Ast.Print_stat ast} 
+    | RETURN; ast = nt_exp;         {Ast.Return_stat ast}
 
 nt_exp:
     | TRUE                          {Ast.Const_bool_exp true}

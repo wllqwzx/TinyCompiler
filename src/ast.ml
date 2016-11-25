@@ -17,13 +17,13 @@ type expression =
   | Call_exp        of string * expression list
 
 type statement =
-  | Empty_stat
-  | Exp_stat      of expression  
+  | Exp_stat      of expression
   | Var_def_stat  of basetype * string * expression
-  | Var_set_stat  of string * expression 
+  | Var_set_stat  of string * expression
   | If_stat       of expression * statement list * statement list
   | While_stat    of expression * statement list
   | Print_stat    of expression
+  | Return_stat   of expression
 
 type param =
   | A_param of string * basetype

@@ -63,7 +63,7 @@ let rec print_statlist =
     fun statli ->
     match statli with
     | []       -> ()
-    | (Exp_stat exp)::sl    -> (print_exp exp); print_statlist sl  
+    | (Exp_stat exp)::sl    -> (print_exp exp); (print_newline ());print_statlist sl  
     | (Var_def_stat (ty, str, exp))::sl -> (print_type ty); 
                                           (print_string (" "^str^" = ")); 
                                           (print_exp exp); 
@@ -97,10 +97,11 @@ let rec print_statlist =
                              (print_exp exp);
                              (print_string " )");
                              (print_newline ());
-                             print_statlist sl 
-    | (Empty_stat)::sl -> (print_string "pass\n");
-                         (print_statlist sl)  
-
+                             print_statlist sl
+    | (Return_stat exp)::sl -> (print_string "return ");
+                              (print_exp exp);
+                              (print_newline ());
+                              print_statlist sl
 
 let rec print_paramlist =
     fun paramli ->

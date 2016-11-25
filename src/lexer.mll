@@ -57,14 +57,13 @@ rule read =
     | "div"         { DIV }
     | "and"         { AND }
     | "or"          { OR }
-    | "lt"          { LT }
-    | "pass"        { PASS } 
+    | "lt"          { LT } 
     | "print"       { PRINT }
     | "true"        { TRUE }
     | "false"       { FALSE }
     | "int"         { INT_TY }
     | "bool"        { BOOL_TY }
-    | "void"        { VOID_TY }
+    | "return"      { RETURN }
     | id_rexp       { ID (Lexing.lexeme lexbuf) }
     | _             { raise (LexerError ("Oops!!! Lexer error with Char: " ^ (Lexing.lexeme lexbuf)
                                           ^ " at " ^ (error_info lexbuf))) }

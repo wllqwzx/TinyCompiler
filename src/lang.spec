@@ -1,9 +1,9 @@
 
 int max(x:int, y:int){
     if( lt(x,y) ){
-        x      
+        return x      
     }else{
-        y
+        return y
     }
 };
 
@@ -16,12 +16,11 @@ int arith(a:int, b:int, c:int){
     if( lt(t,5) ){
         t = add(t,1)
     }else{
-        pass
     };
-    t
+    return t
 };
 
-void main(){
+int main(){
     int t = max(3,5);
     int i = arith(2,4,t);
     i = add(i,1);
@@ -29,7 +28,8 @@ void main(){
     while( or(0<j,i<j) ){
         j = sub(j,1)
     };
-    print(j)
+    print(j);
+    return 0
 }
 
 

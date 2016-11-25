@@ -6,10 +6,16 @@ open Lexer
 open Ast
 open IrAst
 
+let labelid = ref 0
 
 let rec irgen_basicblock = 
     fun statli ->
-    | 
+    let process_stats = 
+        fun stats ->
+        match statli with
+        | [] -> 
+        | s::sl ->
+    in labelid:= !labelid + 1; Ir_a_block ("_label" ^ (string_of_int !labelid), (process_stats statli)) 
 
 let rec irgen_param =
     fun paramli ->
