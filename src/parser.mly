@@ -52,7 +52,6 @@ nt_aparam:
     | str = ID; COLON; ty = nt_type {Ast.A_param (str, ty)}
 
 nt_stat:
-    | ast = nt_exp                  {Ast.Exp_stat ast}
     | ty = nt_type; str = ID; EQUAL; ast = nt_exp
                                     {Ast.Var_def_stat (ty, str, ast)}
     | str = ID; EQUAL; ast = nt_exp {Ast.Var_set_stat (str, ast)}

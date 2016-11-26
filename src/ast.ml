@@ -17,7 +17,6 @@ type expression =
   | Call_exp        of string * expression list
 
 type statement =
-  | Exp_stat      of expression
   | Var_def_stat  of basetype * string * expression
   | Var_set_stat  of string * expression
   | If_stat       of expression * statement list * statement list

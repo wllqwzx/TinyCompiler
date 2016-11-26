@@ -6,31 +6,30 @@ type op =
     | And 
     | Or     
 
-type label = string
-
-type irvar = string
-
-type funName = string
-
-type biexp = 
+type irexp = 
     | Ir_constant  of int 
-    | Ir_irvar     of irvar
-    | Ir_vov       of irvar * op * irvar
-    | Ir_cov       of int * op * irvar
-    | Ir_voc       of irvar * op * int
+    | Ir_var       of string
+    | Ir_vov       of string * op * string
+    | Ir_cov       of int * op * string
+    | Ir_voc       of string * op * int
     | Ir_coc       of int * op * int
-    | Ir_call      of funName
+    | Ir_call      of string (* funName *)
 
 type command =
-    | Ir_assign of irvar * biexp
-    | Ir_goto   of label
-    | Ir_ifz    of irvar * command
+    | Ir_label  of int
+    | Ir_assign of string * irexp
+    | Ir_goto   of int  (* label *)
+    | Ir_ifz    of string * int (* var * label *)
+    | Ir_push   of string
+    | Ir_pop    of string
+    | Ir_ret    of irexp
+(*
+type basicblock =   (* label *)
+    | Ir_a_block of string * command list
+*)
 
-type basicblock = 
-    | Ir_a_block of label * command list
-
-type ir_function_def = 
-    | Ir_a_function of funName * irvar list * basicblock list
+type ir_function_def = (* funName * var list * ... *)
+    | Ir_a_function of string * string list * command array
 
 type ir_program = 
     | Ir_a_program of ir_function_def list 

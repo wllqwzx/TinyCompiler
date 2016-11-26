@@ -6,7 +6,7 @@ open Lexing
 open Parser
 open Lexer
 open Ast
-
+open IrAst
 
 
 let ast =
@@ -63,7 +63,6 @@ let rec print_statlist =
     fun statli ->
     match statli with
     | []       -> ()
-    | (Exp_stat exp)::sl    -> (print_exp exp); (print_newline ());print_statlist sl  
     | (Var_def_stat (ty, str, exp))::sl -> (print_type ty); 
                                           (print_string (" "^str^" = ")); 
                                           (print_exp exp); 
