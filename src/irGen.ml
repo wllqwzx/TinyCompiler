@@ -19,8 +19,10 @@ let getNewVarId () =
     !tempVarId
 
 
-(*let irgen_exp = 
-    fun exp ->*)
+let irgen_exp = 
+    fun exp -> 
+    match exp with
+    |
 
 
 let rec irgen_commli =
@@ -36,11 +38,11 @@ let rec irgen_commli =
                                               let tt2 = Array.append tt [|(Ir_assign (str, tvar))|] in 
                                               irgen_commli cli tt2
     | (If_stat (exp, commli1, commli2))::cli -> let tt = Array.append arr (irgen_exp exp) in
-                                               let tvarName = "_t" ^ (string_of_int !tempVarId) in
+                                               let tvar = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
                                                let lb1 = getLabel () in
                                                let lb2 = getLabel () in 
                                                let lb3 = getLabel () in
-                                               let tt2 = Array.append tt [|(Ir_ifz (tvarName, lb2))|] in
+                                               let tt2 = Array.append tt [|(Ir_ifz (tvar, lb2))|] in
                                                let tt3 = Array.append tt2 [|(Ir_goto lb1)|] in 
                                                let tt4 = Array.append tt3 [|(Ir_label lb1)|] in 
                                                let tt5 = Array.append tt4 (irgen_commli commli1 [||]) in
@@ -50,9 +52,28 @@ let rec irgen_commli =
                                                let tt9 = Array.append tt8 [|(Ir_goto lb3)|] in
                                                let tt10 = Array.append tt9 [|(Ir_label lb3)|] in
                                                irgen_commli cli tt10
-    | (While_stat   (exp, commli1))::cli   ->   
-    | (Print_stat   exp)::cli              -> 
-    | (Return_stat  exp)::cli              -> 
+    | (While_stat   (exp, commli1))::cli   ->   let tt = Array.append arr (irgen_exp exp) in
+                                               let tvar = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
+                                               let lb1 = getLabel () in
+                                               let lb2 = getLabel () in 
+                                               let tt2 = Array.append tt [|(Ir_ifz (tvar, lb2))|] in
+                                               let tt3 = Array.append tt2 [|(Ir_goto lb1)|] in 
+                                               let tt4 = Array.append tt3 [|(Ir_label lb1)|] in 
+                                               let tt5 = Array.append tt4 (irgen_commli commli1 [||]) in
+                                               let tt6 = Array.append tt5 (irgen_exp exp) in
+                                               let tvar = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
+                                               let tt7 = Array.append tt6 [|(Ir_ifz (tvar, lb2))|] in
+                                               let tt8 = Array.append tt7 [|(Ir_goto lb1)|] in
+                                               let tt9 = Array.append tt8 [|(Ir_label lb2)|] in
+                                               irgen_commli cli tt9
+    | (Print_stat   exp)::cli              ->   let tt = Array.append arr (irgen_exp exp) in
+                                               let tvar = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
+                                               let tt1 = Array.append tt [|(Ir_print tvar)|] in
+                                               irgen_commli cli tt1
+    | (Return_stat  exp)::cli              ->   let tt = Array.append arr (irgen_exp exp) in
+                                               let tvar = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
+                                               let tt1 = Array.append tt [|(Ir_ret tvar)|] in
+                                               irgen_commli cli tt1
 
 
 
