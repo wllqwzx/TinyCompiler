@@ -5,6 +5,7 @@ type op =
     | Div 
     | And 
     | Or     
+    | Lt 
 
 type irexp = 
     | Ir_constant  of int 

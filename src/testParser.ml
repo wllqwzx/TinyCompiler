@@ -7,7 +7,7 @@ open Parser
 open Lexer
 open Ast
 open IrAst
-
+open IrGen
 
 let ast =
     match In_channel.input_line stdin with (* read from terminal, we modify it to read from a file *)

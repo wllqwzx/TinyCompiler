@@ -19,11 +19,76 @@ let getNewVarId () =
     !tempVarId
 
 
-let irgen_exp = 
+
+
+let rec irgen_exp = 
     fun exp -> 
     match exp with
-    |
+    | Const_bool_exp bol ->     let tvarName = "_t" ^ (string_of_int (getNewVarId ())) in
+                               if bol then [|(Ir_assign (tvarName, (Ir_constant 1)))|] 
+                                      else [|(Ir_assign (tvarName, (Ir_constant 0)))|]
+    | Lt_exp (exp1, exp2) ->    let tt1 = irgen_exp exp1 in
+                               let tvar1 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in 
+                               let tt2 = irgen_exp exp2 in
+                               let tvar2 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
+                               let tt3 = Ir_biop (tvar1, Lt, tvar2) in
+                               Array.append (Array.append tt1 tt2) tt3
+    | And_exp (exp1, exp2) ->   let tt1 = irgen_exp exp1 in
+                               let tvar1 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in 
+                               let tt2 = irgen_exp exp2 in
+                               let tvar2 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
+                               let tt3 = Ir_biop (tvar1, And, tvar2) in
+                               Array.append (Array.append tt1 tt2) tt3
+    | Or_exp (exp1, exp2) ->    let tt1 = irgen_exp exp1 in
+                               let tvar1 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in 
+                               let tt2 = irgen_exp exp2 in
+                               let tvar2 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
+                               let tt3 = Ir_biop (tvar1, Or, tvar2) in
+                               Array.append (Array.append tt1 tt2) tt3
+    | Const_int_exp num ->      let tvarName = "_t" ^ (string_of_int (getNewVarId ())) in
+                               [|(Ir_assign (tvarName, (Ir_constant num)))|]  
+    | Sub_exp (exp1, exp2) ->    let tt1 = irgen_exp exp1 in
+                               let tvar1 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in 
+                               let tt2 = irgen_exp exp2 in
+                               let tvar2 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
+                               let tt3 = Ir_biop (tvar1, Sub, tvar2) in
+                               Array.append (Array.append tt1 tt2) tt3
+    | Add_exp (exp1, exp2) ->   let tt1 = irgen_exp exp1 in
+                               let tvar1 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in 
+                               let tt2 = irgen_exp exp2 in
+                               let tvar2 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
+                               let tt3 = Ir_biop (tvar1, Sub, tvar2) in
+                               Array.append (Array.append tt1 tt2) tt3
+    | Mul_exp (exp1, exp2) ->   let tt1 = irgen_exp exp1 in
+                               let tvar1 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in 
+                               let tt2 = irgen_exp exp2 in
+                               let tvar2 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
+                               let tt3 = Ir_biop (tvar1, Mul, tvar2) in
+                               Array.append (Array.append tt1 tt2) tt3
+    | Div_exp (exp1, exp2) ->  let tt1 = irgen_exp exp1 in
+                               let tvar1 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in 
+                               let tt2 = irgen_exp exp2 in
+                               let tvar2 = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
+                               let tt3 = Ir_biop (tvar1, Div, tvar2) in
+                               Array.append (Array.append tt1 tt2) tt3
+    | Var_exp str ->            let tvarName = "_t" ^ (string_of_int (getNewVarId ())) in
+                               [|(Ir_assign (tvarName, (Ir_var str)))|]
+    | Call_exp (str, expli) -> let tt1 = irgen_call_params expli [||] in
+                              let tt2 = [|(Ir_call str)|] in
+                              Array.append tt1 tt2
 
+and irgen_call_params =
+    fun expli tvarArray -> 
+    match expli with
+    | [] -> let res = Array.make (Array.length tvarArray) (Ir_push (Ir_var "NONE")) in
+           for t =0 to (Array.length tvarArray) - 1 do
+               Array.set res t [|(Ir_push (Array.get tvarArray t))|]
+           done;
+           res 
+    | e::el -> let tt1 = irgen_exp e in
+              let tvar = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
+              let tt2 = irgen_call_params el (Array.append tvarArray [|tvar|]) in
+              Array.append tt1 tt2
 
 let rec irgen_commli =
     fun commli arr -> 
