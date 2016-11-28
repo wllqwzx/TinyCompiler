@@ -22,9 +22,6 @@ let ast =
 
 (* ---------- test parser ---------- *)
 
-
-
-
 let print_type =
     fun ty ->
     match ty with
@@ -139,6 +136,73 @@ let print_pgm =
 
 
 
+(* --------------------------------------test irgen *)
 
-let _ = print_pgm ast
+let rec print_irexp =
+    fun irexp ->
+    match irexp with
+    | Ir_constant num       -> print_int num 
+    | Ir_var str            -> print_string str
+    | Ir_biop (e1, op, e2)  -> print_irexp e1; print_string " op "; print_irexp e2
+    | Ir_call name          -> print_string ("call " ^ name)
+
+
+let print_ircomm =
+    fun ircomm ->
+    match ircomm with
+    | Ir_label num           -> print_string ("_B" ^ (string_of_int num) ^ ":"); print_newline ()
+    | Ir_assign (str, irexp) -> print_string (str ^ " = "); print_irexp irexp; print_newline ()
+    | Ir_goto num            -> print_string ("goto _B" ^ (string_of_int num)); print_newline ()
+    | Ir_ifz (irexp, num)    -> print_string "ifz "; print_irexp irexp; print_string (" goto _B" ^ (string_of_int num) ^ ":"); print_newline ()  
+    | Ir_push irexp          -> print_string "push "; print_irexp irexp; print_newline ()
+    | Ir_pop str             -> print_string ("pop " ^ str); print_newline ()
+    | Ir_print irexp         -> print_string "print "; print_irexp irexp; print_newline ()
+    | Ir_ret irexp           -> print_string "ret "; print_irexp irexp; print_newline () 
+
+let print_commarr = 
+    fun commarr ->
+    for i = 0 to (Array.length commarr) - 1 do
+        print_ircomm (Array.get commarr i)
+    done
+
+let rec print_irparamli = 
+    fun irparamli ->
+    match irparamli with
+    | [] -> ()
+    | p::pl -> (print_string (p^" ")); print_irparamli pl
+
+let print_irfun =
+    fun irfun ->
+    match irfun with
+    | Ir_a_function (name, irparamli, commarr) -> (print_string name);
+                                               (print_string "( ");
+                                               (print_irparamli irparamli);
+                                               (print_string "){\n");
+                                               (print_commarr commarr);
+                                               (print_string "}\n")
+
+let rec print_irfunli =
+    fun irfunli ->
+    match irfunli with
+    | [] -> ()
+    | f::fl -> (print_irfun f); print_irfunli fl
+
+let print_ir = 
+    fun ir_pgm ->
+    match ir_pgm with
+    | Ir_a_program irfunli -> print_irfunli irfunli
+
+
+
+
+
+
+
+
+
+
+(* ----------------------------------------- *)
+let _ = print_pgm ast;
+        print_string "--------------IR:\n";
+        print_ir (irgen ast)
 (* ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core src/testParser.native *)
