@@ -8,6 +8,7 @@ open Lexer
 open Ast
 open IrAst
 open IrGen
+open Cfg
 
 let ast =
     match In_channel.input_line stdin with (* read from terminal, we modify it to read from a file *)
@@ -204,5 +205,6 @@ let print_ir =
 (* ----------------------------------------- *)
 let _ = print_pgm ast;
         print_string "--------------IR:\n";
-        print_ir (irgen ast)
+        print_ir (irgen ast);
+        Cfg.test 123
 (* ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core src/testParser.native *)
