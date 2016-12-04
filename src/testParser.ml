@@ -206,5 +206,4 @@ let print_ir =
 let _ = print_pgm ast;
         print_string "--------------IR:\n";
         print_ir (irgen ast);
-        Cfg.test 123
 (* ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core src/testParser.native *)

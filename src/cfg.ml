@@ -14,7 +14,7 @@ let edgeHtb = Hashtbl.create ~hashable:String.hashable ()
 
 let transCommarrToHtb =
     fun name commarr ->
-    let mat = Array.make_matrix 50 50 0 in    (* a matrix *)
+    let mat = Array.make_matrix 100 100 0 in    (* a matrix *)
     let nodesHtb = Hashtbl.create ~hashable:Core_kernel.Std_kernel.Int.hashable () in 
     let curLab = ref 0 in
     let processComm =
@@ -64,9 +64,4 @@ let makeCFG =
     match irpgm with
     | Ir_a_program fun_def_list -> makeFuncliCFG fun_def_list
 
-
-
-let test = 
-    fun x ->
-    print_int x
 
