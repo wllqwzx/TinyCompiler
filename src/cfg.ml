@@ -8,14 +8,14 @@ open Ast
 open IrAst
 open Util
 
-let funcHtb = Hashtbl.create ~hashable:String.hashable ()
-let edgeHtb = Hashtbl.create ~hashable:String.hashable ()
+let funcHtb = Hashtbl.create ~hashable:String.hashable ()   (* funName ---> hashTable:(Lid ---> ref arr) *)
+let edgeHtb = Hashtbl.create ~hashable:String.hashable ()   (* funName ---> matrix *)
 
 
 let transCommarrToHtb =
     fun name commarr ->
-    let mat = Array.make_matrix 100 100 0 in    (* a matrix *)
-    let nodesHtb = Hashtbl.create ~hashable:Core_kernel.Std_kernel.Int.hashable () in 
+    let mat = Array.make_matrix 100 100 0 in    (* a edge matrix *)
+    let nodesHtb = Hashtbl.create ~hashable:Core_kernel.Std_kernel.Int.hashable () in  (* basic block hash table *)
     let curLab = ref 0 in
     let processComm =
         fun ind comm -> 
@@ -43,7 +43,7 @@ let transCommarrToHtb =
                       | None -> print_string "impossible!"
                       end
     in
-    Array.iteri processComm commarr;
+    Array.iteri processComm commarr;   (* trans comm arr to edge matrix and basic block hash table *)
     let _ = Hashtbl.add edgeHtb name mat in
     nodesHtb
 
