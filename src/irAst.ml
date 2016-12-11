@@ -7,11 +7,13 @@ type op =
     | Or     
     | Lt 
 
+
 type irexp = 
     | Ir_constant  of int 
     | Ir_var       of string
     | Ir_biop      of irexp * op * irexp (* only: constant or var *)
     | Ir_call      of string (* funName *)
+    | Ir_Phi       of irexp * irexp
 
 type command =
     | Ir_label  of int

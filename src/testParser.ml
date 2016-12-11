@@ -140,13 +140,25 @@ let print_pgm =
 
 (* --------------------------------------test irgen *)
 
+let print_op =
+    fun op ->
+    match op with
+    | Add -> print_string " + "
+    | Sub -> print_string " - "
+    | Mul -> print_string " * "
+    | Div -> print_string " / "
+    | And -> print_string " && "
+    | Or  -> print_string " || "    
+    | Lt  -> print_string " < "
+
 let rec print_irexp =
     fun irexp ->
     match irexp with
     | Ir_constant num       -> print_int num 
     | Ir_var str            -> print_string str
-    | Ir_biop (e1, op, e2)  -> print_irexp e1; print_string " op "; print_irexp e2
+    | Ir_biop (e1, op, e2)  -> print_irexp e1; print_op op; print_irexp e2
     | Ir_call name          -> print_string ("call " ^ name)
+    | Ir_Phi (e1, e2)       -> print_string "Phi("; print_irexp e1; print_string ", ";print_irexp e2; print_string ")"
 
 
 let print_ircomm =

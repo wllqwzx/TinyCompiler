@@ -61,10 +61,30 @@ let getDomFrontier =
     domFtr
 
 
-(*
+
 let addPhiFunc = 
     fun nodeHtb domFrt ->
-*)
+    let defSite = Hashtbl.create ~hashable:String.hashable () in
+    let addVarToDefSite =
+        fun varName site ->
+        let arrRefOpt = Hashtbl.find defSite varName in
+        match arrRefOpt with
+        | None -> Hashtbl.add defSite varName (ref [|site|]); ()
+        | Some arrRef -> Util.insertBack arrRef site 
+    in
+    let addToDefSite =
+        fun ~key ~data ->
+        for i = 0 to (Array.length data) - 1 do
+            let comm = data.(i) in 
+            match comm with
+            | Ir_assign (str, exp) -> addVarToDefSite str key
+            | Ir_pop str -> addVarToDefSite str key
+            | _ -> () 
+        done        
+    in
+    Hashtbl.iteri nodeHtb addToDefSite; (* defSite finished! *)
+    
+
 
 
 (*
@@ -92,8 +112,8 @@ let transFuncToSSA =
     | Some edgeMat -> outPutEdge edgeMat;
                      let domFrt = getDomFrontier () in
                      (*Hashtbl.iteri domFrt showDomFtr *) (* debug *)
-                     (*addPhiFunc data domFrt;
-                     reName data*)
+                     addPhiFunc data domFrt
+                     (*reName data*)
     | None -> print_string "impossible!"   
 
 

@@ -126,11 +126,11 @@ let rec irgen_commli =
                                                let tt9 = Array.append tt8 [|(Ir_goto lb3)|] in
                                                let tt10 = Array.append tt9 [|(Ir_label lb3)|] in
                                                irgen_commli cli tt10
-    | (While_stat   (exp, commli1))::cli   ->   let tt = Array.append arr (irgen_exp exp) in
-                                               let tvar = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
-                                               let lb1 = getLabel () in
+    | (While_stat   (exp, commli1))::cli   ->   let tt = Array.append arr (irgen_exp exp) in 
+                                               let tvar = Ir_var ("_t" ^ (string_of_int !tempVarId)) in 
+                                               let lb1 = getLabel () in 
                                                let lb2 = getLabel () in 
-                                               let tt2 = Array.append tt [|(Ir_ifz (tvar, lb2))|] in
+                                               let tt2 = Array.append tt [|(Ir_ifz (tvar, lb2))|] in 
                                                let tt3 = Array.append tt2 [|(Ir_goto lb1)|] in 
                                                let tt4 = Array.append tt3 [|(Ir_label lb1)|] in 
                                                let tt5 = Array.append tt4 (irgen_commli commli1 [||]) in
