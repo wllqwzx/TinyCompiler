@@ -23,15 +23,29 @@ int start;
 
 //get entry point
 int getStart(){
+	int deg[105];
+	memset(deg,-1,sizeof(deg));
 	int i,j;
 	for(i=0;i<=100;i++){
 		for(j=0;j<=100;j++){
 			if(chds[i][j]!=0){
-				return i;
+				if(deg[i] == -1){
+					deg[i] = 0;
+				}
+				if(deg[j] == -1){
+					deg[j] = 1;
+				}else{
+					deg[j] += 1;
+				}
+
 			}
 		}
 	}
-	return -1;	// error!
+	for(i=0;i<=100;i++){
+		if(deg[i] == 0)
+			return i;
+	}
+	return -1; // error!
 }
 
 
@@ -144,7 +158,7 @@ void computeDf(int node){
 int main()
 {
 	freopen(".temp.in", "r", stdin);
-	//freopen(".temp.out", "w", stdout);
+	freopen(".temp.out", "w", stdout);
 	int f,t;
 	memset(chds,0,sizeof(chds));
 	memset(fath,0,sizeof(fath));
@@ -160,20 +174,24 @@ int main()
 	computeDomTree();
 
 	//test dom tree
+	/*
 	printf("start:: %d\n", start);
 	for(int i = 0;i<=100;i++){
 		if(domFath[i] != -1){
 			printf("%d --> %d\n", i,domFath[i]);
 		}
 	}
+	*/
 
-	//test dom friter
+	
 	computeDf(start);
+	//ptint out dom friter
 	for(int i=0;i<=100;i++){
 		if(acc[i] == true){
-			printf("dom frontier of %d is:\n", i);
+			printf("%d ", i);
+			printf("%d ", (int)df[i].size());
 			for(vector<int>::iterator iter = df[i].begin(); iter != df[i].end(); iter++){
-				printf("%d \n", *iter);
+				printf("%d ", *iter);
 			}
 			printf("\n");
 		}

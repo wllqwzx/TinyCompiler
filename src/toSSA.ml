@@ -28,8 +28,8 @@ let outPutEdge =
 let addLineToDomFtr = 
     fun domFtr ->
     fun str ->
-    let strList = String.split str ' ' in
-    let intList = List.map strList (fun str -> int_of_string str) in
+    let strList = List.filter (String.split str ' ') (fun s -> if phys_equal (String.compare s "")  0 then false else true)in
+    let intList = List.map strList (fun s -> Core_kernel.Std_kernel.Int.of_string s) in
     let Some bid = List.hd intList in
     let Some tail = List.tl intList in
     let Some count = List.hd tail in 
@@ -61,25 +61,39 @@ let getDomFrontier =
     domFtr
 
 
-(* 3 *)
+(*
 let addPhiFunc = 
     fun nodeHtb domFrt ->
-    
+*)
 
-(* 4 *)
+
+(*
 let reName =
     fun nodeHtb ->
+*)
 
+
+(* debug function *)
+let showDomFtr = 
+    fun ~(key:Core_kernel.Std_kernel.Int.t Core.Std.Hashtbl.key) ~data ->
+    print_string "showDomFtr is called!\n";
+    print_int key;
+    print_string ": ";
+    if phys_equal (Array.length !data) 0 
+    then print_string "empty"
+    else Array.iter !data (fun num -> print_int num; print_string " ");
+    print_newline ()
 
 
 let transFuncToSSA = 
-    fun key data ->
+    fun ~key ~data ->
     let mat = Hashtbl.find Cfg.edgeHtb key in
     match mat with
     | Some edgeMat -> outPutEdge edgeMat;
                      let domFrt = getDomFrontier () in
-                     addPhiFunc data domFrt;
-                     reName data
+                     (*Hashtbl.iteri domFrt showDomFtr *) (* debug *)
+                     (*addPhiFunc data domFrt;
+                     reName data*)
     | None -> print_string "impossible!"   
 
 

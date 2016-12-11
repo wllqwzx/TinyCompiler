@@ -9,6 +9,7 @@ open Ast
 open IrAst
 open IrGen
 open Cfg
+open ToSSA
 
 let ast =
     match In_channel.input_line stdin with (* read from terminal, we modify it to read from a file *)
@@ -205,5 +206,8 @@ let print_ir =
 (* ----------------------------------------- *)
 let _ = print_pgm ast;
         print_string "--------------IR:\n";
-        print_ir (irgen ast);
+        let ir_ast = irgen ast in
+        print_ir ir_ast;
+        makeCFG ir_ast;
+        transToSSA ()
 (* ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core src/testParser.native *)
