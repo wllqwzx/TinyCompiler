@@ -74,16 +74,46 @@ let addPhiFunc =
     in
     let addToDefSite =
         fun ~key ~data ->
-        for i = 0 to (Array.length data) - 1 do
-            let comm = data.(i) in 
+        for i = 0 to (Array.length !data) - 1 do
+            let comm = !data.(i) in 
             match comm with
             | Ir_assign (str, exp) -> addVarToDefSite str key
             | Ir_pop str -> addVarToDefSite str key
             | _ -> () 
         done        
     in
+    let addVarPhiToNone = 
+        fun varName node -> 
+        let hasAppear = ref false in
+        for i = 0 to (Array.length !node) - 1 do
+            let comm = !node.(i) in
+            match comm with
+            | Ir_assign (str, (Ir_Phi (str1, str2))) -> if (String.compare str varName) = 0 
+                                                       then hasAppear := true else ()
+            | othercomm -> ();
+            if !hasAppear = true
+            then ()
+            else Util.insertFront node (Ir_assign (varName, (Ir_Phi (varName, varName))))
+        done
+    in
+    let addPhiForVar = 
+        fun ~key ~data ->
+        for i = 0 to (Array.length !data) - 1 do
+            let site = !data.(i) in
+            let siteDomFtr = Hashtbl.find domFrt site in
+            match siteDomFtr with
+            | None -> ()
+            | Some arrRef -> for j = 0 to (Array.length !arrRef) - 1 do
+                                let t = !arrRef.(j) in
+                                let curNodeOpt = Hashtbl.find nodeHtb t in
+                                match curNodeOpt with
+                                | None -> print_string "impossible!"
+                                | Some curNode -> addVarPhiToNone key curNode
+                            done 
+        done
+    in
     Hashtbl.iteri nodeHtb addToDefSite; (* defSite finished! *)
-    
+    Hashtbl.iteri defSite addPhiForVar
 
 
 

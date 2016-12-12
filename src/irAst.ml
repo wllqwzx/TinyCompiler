@@ -13,7 +13,7 @@ type irexp =
     | Ir_var       of string
     | Ir_biop      of irexp * op * irexp (* only: constant or var *)
     | Ir_call      of string (* funName *)
-    | Ir_Phi       of irexp * irexp
+    | Ir_Phi       of string * string
 
 type command =
     | Ir_label  of int
