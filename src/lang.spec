@@ -33,4 +33,4 @@ int main(){
 }
 
 
-int main(a:int, b:int){ a = add(a,1); b = add(b,1); if(lt(a,b)){return a}else{return b}}
+int main(a:int, b:int){ a = add(a,1); b = add(b,1); if(lt(a,b)){a = mul(a,2); return a}else{b = mul(b,2); return b}}

@@ -9,7 +9,7 @@ open IrAst
 open Util
 open Cfg
 
-(* 1 *)
+(* ------------ 1 *)
 let outPutEdge =
     fun edgeMat ->
     let fout = Out_channel.create ".temp.in" in
@@ -47,7 +47,7 @@ let addLineToDomFtr =
                    arr := narr;
                    Hashtbl.add domFtr bid arr; ()
 
-(* 2 *)
+(* ------------- 2 *)
 let getDomFrontier =
     fun () ->
     let domFtr = Hashtbl.create ~hashable:Core_kernel.Std_kernel.Int.hashable () in
@@ -82,7 +82,7 @@ let addPhiFunc =
             | _ -> () 
         done        
     in
-    let addVarPhiToNone = 
+    let addVarPhiToNode = 
         fun varName node -> 
         let hasAppear = ref false in
         for i = 0 to (Array.length !node) - 1 do
@@ -91,10 +91,10 @@ let addPhiFunc =
             | Ir_assign (str, (Ir_Phi (str1, str2))) -> if (String.compare str varName) = 0 
                                                        then hasAppear := true else ()
             | othercomm -> ();
-            if !hasAppear = true
-            then ()
-            else Util.insertFront node (Ir_assign (varName, (Ir_Phi (varName, varName))))
-        done
+        done;
+        if !hasAppear = true
+        then ()
+        else Util.insertFront node (Ir_assign (varName, (Ir_Phi (varName, varName))))
     in
     let addPhiForVar = 
         fun ~key ~data ->
@@ -102,13 +102,13 @@ let addPhiFunc =
             let site = !data.(i) in
             let siteDomFtr = Hashtbl.find domFrt site in
             match siteDomFtr with
-            | None -> ()
+            | None -> print_string "impossible!"
             | Some arrRef -> for j = 0 to (Array.length !arrRef) - 1 do
                                 let t = !arrRef.(j) in
                                 let curNodeOpt = Hashtbl.find nodeHtb t in
                                 match curNodeOpt with
                                 | None -> print_string "impossible!"
-                                | Some curNode -> addVarPhiToNone key curNode
+                                | Some curNode -> addVarPhiToNode key curNode
                             done 
         done
     in
@@ -117,16 +117,17 @@ let addPhiFunc =
 
 
 
-(*
+
+
+(* --------------- 3*)
 let reName =
     fun nodeHtb ->
-*)
+    
 
 
-(* debug function *)
+(* --------------- debug function *)
 let showDomFtr = 
     fun ~(key:Core_kernel.Std_kernel.Int.t Core.Std.Hashtbl.key) ~data ->
-    print_string "showDomFtr is called!\n";
     print_int key;
     print_string ": ";
     if phys_equal (Array.length !data) 0 
@@ -141,10 +142,13 @@ let transFuncToSSA =
     match mat with
     | Some edgeMat -> outPutEdge edgeMat;
                      let domFrt = getDomFrontier () in
-                     (*Hashtbl.iteri domFrt showDomFtr *) (* debug *)
-                     addPhiFunc data domFrt
-                     (*reName data*)
+                     print_string "\n ------------------- domFrt \n";
+                     Hashtbl.iteri domFrt showDomFtr; (* debug *)
+                     addPhiFunc data domFrt;
+                     reName data
     | None -> print_string "impossible!"   
+
+
 
 
 let transToSSA = 
