@@ -154,47 +154,8 @@ let addPhiFunc =
 
 (* --------------- 3*)
 
-(*let varStack = Hashtbl.create ~hashable:String.hashable ()      (* funName ---> Hashtbl:(varName ---> stack) *)
-let varCount = Hashtbl.create ~hashable:String.hashable ()
-
-let init = 
-    fun nodeHtb ->
-    let reNameAFunc = 
-        fun ~key ~data ->
-        let funcVarStack = Hashtbl.create ~hashable:String.hashable () in
-        let funcVarCount = Hashtbl.create ~hashable:String.hashable () in
-        let reNameBlock = 
-            fun ~key ~data ->
-            for i = 0 to (Array.length !data) - 1 do
-                let comm = !data.(i) in
-                match comm with
-                | Ir_assign (str, exp) -> let exist = Hashtbl.find funcVarStack str in
-                                         begin
-                                         match exist with
-                                         | None ->  let stk = Stack.create () in 
-                                                   Stack.push stk 0;
-                                                   Hashtbl.add funcVarStack str stk;
-                                                   Hashtbl.add funcVarCount str (ref 0);()
-                                         | Some st -> ()
-                                         end 
-                | _ -> ()
-            done
-        in    
-        Hashtbl.iteri data reNameBlock;
-        Hashtbl.add varStack key funcVarStack;
-        Hashtbl.add varCount key funcVarCount;()
-    in
-    Hashtbl.iteri Cfg.funcHtb reNameAFunc
-
-
-let reNameBlock = 
-    fun bid ->
-*)
-
-
-
 let reName =
-    fun nodeHtb startNode domTree ->
+    fun nodeHtb startNode domTree edgeMat fatherArrayInFunc ->
     let funcVarStack = Hashtbl.create ~hashable:String.hashable () in
     let funcVarCount = Hashtbl.create ~hashable:String.hashable () in
     let initBlock = 
@@ -214,12 +175,13 @@ let reName =
                 | _ -> ()
             done
     in    
-    let reNameNode = 
-        fun n domt ->
+    let rec reNameNode = 
+        fun n ->
         let commarrOpt = Hashtbl.find nodeHtb n in
+        (* part 1 *)
         begin
         match commarrOpt with
-        | None -> print_string "impossible!"
+        | None -> print_string "error 1 in reNameNode!"
         | Some commarr -> for i = 0 to (Array.length !commarr) - 1 do
                             let s = !commarr.(i) in
                             begin
@@ -287,11 +249,77 @@ let reName =
                             | _ -> ()
                             end
                          done
+        end;
+        (* part 2 *)
+        for i = 0 to 99 do
+            let y = edgeMat.(n).(i) in
+            if y = 1 then
+                let Some fatherOfY = Hashtbl.find fatherArrayInFunc i in
+                let th = ref (-1) in
+                for tt = 0 to (Array.length !fatherOfY) - 1 do
+                    if !fatherOfY.(tt) = n then
+                        th := tt (* th should be 0 or 1 *)
+                    else ()
+                done;
+                let commarrOptOfI = Hashtbl.find nodeHtb i in
+                begin
+                match commarrOptOfI with
+                | None -> print_string "error 2 in reNameNode!"
+                | Some commarrOfI -> for comid = 0 to (Array.length !commarrOfI) - 1 do
+                                        let comm = !commarrOfI.(comid) in
+                                        begin
+                                        match comm with
+                                        | Ir_assign (str, (Ir_Phi (str1, str2))) -> 
+                                                if !th = 0 then
+                                                    let Some stk = Hashtbl.find funcVarStack str1 in
+                                                    let Some ii = Stack.top stk in
+                                                    let n_str1 = str1 ^ (string_of_int ii) in
+                                                    Array.set !commarrOfI comid (Ir_assign (str, (Ir_Phi (n_str1, str2))))
+                                                else if !th = 1 then
+                                                        let Some stk = Hashtbl.find funcVarStack str2 in
+                                                        let Some ii = Stack.top stk in
+                                                        let n_str2 = str2 ^ (string_of_int ii) in
+                                                        Array.set !commarrOfI comid (Ir_assign (str, (Ir_Phi (str1, n_str2))))
+                                                     else print_string "error 3 in reNameNode!" 
+                                        | _ -> ()
+                                        end
+                                    done
+                end
+            else ()
+        done;
+        (* part 3 *)
+        let Some domedByN = Hashtbl.find domTree n in
+        for i = 0 to (Array.length !domedByN) - 1 do
+            let x = !domedByN.(i) in
+            reNameNode x            
+        done;
+        (* part 4 *)
+        let commarrOpt = Hashtbl.find nodeHtb n in
+        begin
+        match commarrOpt with
+        | None -> print_string "error 1 in reNameNode!"
+        | Some commarr -> for i = 0 to (Array.length !commarr) - 1 do
+                            let s = !commarr.(i) in
+                            begin
+                            match s with
+                            | Ir_assign (str, exp) -> let posli = String.substr_index_all str false "_" in
+                                                     let Some pos = List.last posli in
+                                                     let n_str = String.drop_suffix str (pos - 1) in
+                                                     let Some stk = Hashtbl.find funcVarStack n_str in
+                                                     Stack.pop stk; ()
+                            | Ir_pop str -> let posli = String.substr_index_all str false "_" in
+                                            let Some pos = List.last posli in
+                                            let n_str = String.drop_suffix str (pos - 1) in
+                                            let Some stk = Hashtbl.find funcVarStack n_str in
+                                            Stack.pop stk; ()
+                            | _ -> ()
+                            end
+                         done 
         end
         
     in
     Hashtbl.iteri nodeHtb initBlock;
-    reNameNode startNode domTree
+    reNameNode startNode
 
 
 
@@ -325,6 +353,7 @@ let transFuncToSSA =
     | Some edgeMat -> outPutEdge edgeMat;
                      let domFrt = getDomFrontier () in
                      let (startNode, domTree) = getDomTree () in
+                     let Some fatherArrayInFunc = Hashtbl.find fatherArray key in
                      (* debug ------ start *)
                      print_string "\n ------------------- domFrt \n";
                      Hashtbl.iteri domFrt showDomFtr; 
@@ -334,8 +363,8 @@ let transFuncToSSA =
                      print_newline ();
                      Hashtbl.iteri domTree showDomTree; 
                      (* debug ----- end *)
-                     addPhiFunc data domFrt
-                     reName data startNode domTree
+                     addPhiFunc data domFrt;
+                     reName data startNode domTree edgeMat fatherArrayInFunc
     | None -> print_string "impossible!"   
 
 
