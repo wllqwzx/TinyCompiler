@@ -11,6 +11,7 @@ open Util
 let funcHtb = Hashtbl.create ~hashable:String.hashable ()   (* funName ---> hashTable:(Lid ---> ref arr) *)
 let edgeHtb = Hashtbl.create ~hashable:String.hashable ()   (* funName ---> matrix *)
 let nodeSeq = Hashtbl.create ~hashable:String.hashable ()   (* funName ---> int array *)
+let fatherArray = Hashtbl.create ~hashable:String.hashable () (* funcName ---> hashTable:(Lid ---> ref arr) *)
 
 let transCommarrToHtb =
     fun name commarr ->
@@ -66,6 +67,37 @@ let makeCFG =
     fun irpgm -> 
     match irpgm with
     | Ir_a_program fun_def_list -> makeFuncliCFG fun_def_list
+
+(* -------- makeFatherArray ------- *)
+
+let makeFatherArray = (* call after makeCFG *) 
+    fun () -> 
+    let makeFatherArrayInFunc = 
+        fun ~key ~data ->
+        let fatherArrayInFunc = Hashtbl.create ~hashable:Core_kernel.Std_kernel.Int.hashable () in
+        for i = 0 to 99 do
+            for j = 0 to 99 do
+                let t = data.(i).(j) in
+                if t = 1 then
+                    let has_i = Hashtbl.find fatherArrayInFunc i in
+                    let has_j = Hashtbl.find fatherArrayInFunc j in
+                    begin
+                    match has_i with
+                    | None -> Hashtbl.add fatherArrayInFunc i (ref [||]);()
+                    | Some arrref -> ()
+                    end;
+                    begin 
+                    match has_j with
+                    | None -> Hashtbl.add fatherArrayInFunc j (ref [|i|]); ()
+                    | Some arrref -> Util.insertBack arrref i
+                    end
+                else ()
+            done
+        done;
+        Hashtbl.add fatherArray key fatherArrayInFunc;()
+    in
+    Hashtbl.iteri edgeHtb makeFatherArrayInFunc 
+
 
 
 (* ------- print cfg ------- *)

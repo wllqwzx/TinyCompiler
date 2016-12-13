@@ -15,7 +15,7 @@ type irexp =
     | Ir_call      of string (* funName *)
     | Ir_Phi       of string * string
 
-type command =
+type command = 
     | Ir_label  of int
     | Ir_assign of string * irexp
     | Ir_goto   of int  (* label *)
