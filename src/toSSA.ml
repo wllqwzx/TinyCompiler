@@ -55,8 +55,18 @@ let addLineToDomTree =
     let Some father = List.hd intList in
     let Some tail = List.tl intList in
     let Some child = List.hd tail in 
-    
-
+    let arrOfFather = Hashtbl.find domTree father in
+    let arrOfChild = Hashtbl.find domTree child in
+    begin
+        match arrOfFather with
+        | None -> Hashtbl.add domTree father (ref [|child|]); ()
+        | Some arrref -> Util.insertBack arrref child
+    end;
+    begin
+        match arrOfChild with
+        | None -> Hashtbl.add domTree child (ref [||]); () 
+        | Some arrref -> () 
+    end
 
 (*----*)
 
@@ -184,7 +194,7 @@ let reNameBlock =
 
 
 let reName =
-    fun nodeHtb ->
+    fun nodeHtb startNode domTree ->
     let funcVarStack = Hashtbl.create ~hashable:String.hashable () in
     let funcVarCount = Hashtbl.create ~hashable:String.hashable () in
     let initBlock = 
@@ -296,20 +306,37 @@ let showDomFtr =
     else Array.iter !data (fun num -> print_int num; print_string " ");
     print_newline ()
 
+let showDomTree =
+    fun ~key ~data ->
+    print_int key;
+    print_string ": ";
+    if phys_equal (Array.length !data) 0 
+    then print_string "empty"
+    else Array.iter !data (fun num -> print_int num; print_string " ");
+    print_newline ()
 
+
+
+(* -------------------------- *)
 let transFuncToSSA = 
     fun ~key ~data ->
     let mat = Hashtbl.find Cfg.edgeHtb key in
     match mat with
     | Some edgeMat -> outPutEdge edgeMat;
                      let domFrt = getDomFrontier () in
+                     let (startNode, domTree) = getDomTree () in
+                     (* debug ------ start *)
                      print_string "\n ------------------- domFrt \n";
-                     Hashtbl.iteri domFrt showDomFtr; (* debug *)
-                     addPhiFunc data domFrt;
-                     reName data
+                     Hashtbl.iteri domFrt showDomFtr; 
+                     print_string "\n ------------------- domTree \n";
+                     print_string "start node is: ";
+                     print_int startNode;
+                     print_newline ();
+                     Hashtbl.iteri domTree showDomTree; 
+                     (* debug ----- end *)
+                     addPhiFunc data domFrt
+                     reName data startNode domTree
     | None -> print_string "impossible!"   
-
-
 
 
 let transToSSA = 

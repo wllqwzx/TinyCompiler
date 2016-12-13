@@ -158,7 +158,6 @@ void computeDf(int node){
 int main()
 {
 	freopen(".temp.in", "r", stdin);
-	freopen(".temp.out", "w", stdout);
 	int f,t;
 	memset(chds,0,sizeof(chds));
 	memset(fath,0,sizeof(fath));
@@ -173,17 +172,18 @@ int main()
 
 	computeDomTree();
 
-	//test dom tree
-	/*
-	printf("start:: %d\n", start);
+	//print dom tree
+	freopen(".domTree.out", "w", stdout);
+	printf("%d\n", start);
+
 	for(int i = 0;i<=100;i++){
 		if(domFath[i] != -1){
-			printf("%d --> %d\n", i,domFath[i]);
+			printf("%d %d\n", domFath[i],i);
 		}
 	}
-	*/
 
 	
+	freopen(".temp.out", "w", stdout);
 	computeDf(start);
 	//ptint out dom friter
 	for(int i=0;i<=100;i++){
