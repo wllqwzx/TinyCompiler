@@ -221,6 +221,7 @@ let _ = print_pgm ast;
         let ir_ast = irgen ast in
         print_ir ir_ast;
         makeCFG ir_ast;
+        makeFatherArray ();
         transToSSA ();
         Cfg.print_CFG ()
 (* ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core src/testParser.native *)

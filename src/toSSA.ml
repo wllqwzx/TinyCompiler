@@ -159,7 +159,7 @@ let reName =
     let funcVarStack = Hashtbl.create ~hashable:String.hashable () in
     let funcVarCount = Hashtbl.create ~hashable:String.hashable () in
     let initBlock = 
-            fun ~key ~data ->
+        fun ~key ~data ->
             for i = 0 to (Array.length !data) - 1 do
                 let comm = !data.(i) in
                 match comm with
@@ -172,6 +172,15 @@ let reName =
                                                    Hashtbl.add funcVarCount str (ref 0);()
                                          | Some st -> ()
                                          end 
+                | Ir_pop str -> let exist = Hashtbl.find funcVarStack str in
+                                begin
+                                match exist with
+                                | None ->  let stk = Stack.create () in 
+                                        Stack.push stk 0;
+                                        Hashtbl.add funcVarStack str stk;
+                                        Hashtbl.add funcVarCount str (ref 0);()
+                                | Some st -> ()
+                                end  
                 | _ -> ()
             done
     in    
@@ -217,10 +226,6 @@ let reName =
                                                         let Some ii = Stack.top stk in
                                                         let n_str = str ^ "_" ^ (string_of_int ii) in
                                                         Array.set !commarr i (Ir_push   (Ir_var n_str)) 
-                            | Ir_pop    str ->  let Some stk = Hashtbl.find funcVarStack str in
-                                                let Some ii = Stack.top stk in
-                                                let n_str = str ^ "_" ^ (string_of_int ii) in
-                                                Array.set !commarr i (Ir_pop n_str)
                             | Ir_print  (Ir_var str) -> let Some stk = Hashtbl.find funcVarStack str in
                                                         let Some ii = Stack.top stk in
                                                         let n_str = str ^ "_" ^ (string_of_int ii) in
@@ -273,12 +278,12 @@ let reName =
                                                 if !th = 0 then
                                                     let Some stk = Hashtbl.find funcVarStack str1 in
                                                     let Some ii = Stack.top stk in
-                                                    let n_str1 = str1 ^ (string_of_int ii) in
+                                                    let n_str1 = str1 ^ "_" ^ (string_of_int ii) in
                                                     Array.set !commarrOfI comid (Ir_assign (str, (Ir_Phi (n_str1, str2))))
                                                 else if !th = 1 then
                                                         let Some stk = Hashtbl.find funcVarStack str2 in
                                                         let Some ii = Stack.top stk in
-                                                        let n_str2 = str2 ^ (string_of_int ii) in
+                                                        let n_str2 = str2 ^ "_" ^ (string_of_int ii) in
                                                         Array.set !commarrOfI comid (Ir_assign (str, (Ir_Phi (str1, n_str2))))
                                                      else print_string "error 3 in reNameNode!" 
                                         | _ -> ()
@@ -304,19 +309,19 @@ let reName =
                             match s with
                             | Ir_assign (str, exp) -> let posli = String.substr_index_all str false "_" in
                                                      let Some pos = List.last posli in
-                                                     let n_str = String.drop_suffix str (pos - 1) in
+                                                     let n_str = String.drop_suffix str ((String.length str) -  pos) in
                                                      let Some stk = Hashtbl.find funcVarStack n_str in
                                                      Stack.pop stk; ()
                             | Ir_pop str -> let posli = String.substr_index_all str false "_" in
                                             let Some pos = List.last posli in
-                                            let n_str = String.drop_suffix str (pos - 1) in
+                                            let n_str = String.drop_suffix str ((String.length str) -  pos) in
                                             let Some stk = Hashtbl.find funcVarStack n_str in
                                             Stack.pop stk; ()
                             | _ -> ()
                             end
                          done 
         end
-        
+    
     in
     Hashtbl.iteri nodeHtb initBlock;
     reNameNode startNode
