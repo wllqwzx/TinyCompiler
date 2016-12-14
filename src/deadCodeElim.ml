@@ -4,7 +4,7 @@ open IrAst
 let deadCodeElimForFunc = 
     fun ~key ~data -> (* key:funName, data:hashtb for blocks*)
     let varUse = Hashtbl.create ~hashable:String.hashable () in
-    let hasDeleted = ref false in
+    let hasDeleted = ref true in
     let funNodes = data in
 
     let makeVarUseInBlock = 
@@ -136,23 +136,22 @@ let deadCodeElimForFunc =
     let deleteVarDef = 
         fun var ->
         fun ~key ~data -> (* key:lid, data:ref arr *)
+        let newarr = ref [||] in
         for i = 0 to (Array.length !data) - 1 do
             let comm = !data.(i) in
             match comm with
             | Ir_assign (str, (Ir_var str1)) -> 
                         if (String.compare str var) = 0 then
                             begin
-                            Util.dropAt data i;
                             let c1opt = Hashtbl.find varUse str1 in
                             match c1opt with
                             | None -> print_string "error 1 in deleteVarDef!\n" 
                             | Some c1 -> c1 := !c1 - 1
                             end
-                        else ()
+                        else Util.insertBack newarr comm
             | Ir_assign (str, (Ir_Phi (str1, str2))) -> 
                         if (String.compare str var) = 0 then
                         begin
-                            Util.dropAt data i;
                             let c1opt = Hashtbl.find varUse str1 in
                             begin
                             match c1opt with
@@ -166,11 +165,10 @@ let deadCodeElimForFunc =
                             | Some c2 -> c2 := !c2 - 1
                             end
                         end
-                        else ()
+                        else Util.insertBack newarr comm
             | Ir_assign (str, (Ir_biop ((Ir_var str1), op, (Ir_var str2)))) -> 
                         if (String.compare str var) = 0 then
                         begin
-                            Util.dropAt data i;
                             let c1opt = Hashtbl.find varUse str1 in
                             begin
                             match c1opt with
@@ -184,35 +182,35 @@ let deadCodeElimForFunc =
                             | Some c2 -> c2 := !c2 - 1
                             end
                         end
-                        else ()
+                        else Util.insertBack newarr comm
             | Ir_assign (str, (Ir_biop ((Ir_var str1), op, (Ir_constant num)))) ->
                         if (String.compare str var) = 0 then
                         begin
-                            Util.dropAt data i;
                             let c1opt = Hashtbl.find varUse str1 in
                             match c1opt with
                             | None -> print_string "error 6 in deleteVarDef!\n" 
                             | Some c1 -> c1 := !c1 - 1
                         end
-                        else ()
+                        else Util.insertBack newarr comm
             | Ir_assign (str, (Ir_biop ((Ir_constant num), op, (Ir_var str1)))) ->
                         if (String.compare str var) = 0 then
                         begin
-                            Util.dropAt data i;
                             let c1opt = Hashtbl.find varUse str1 in
                             match c1opt with
                             | None -> print_string "error 7 in deleteVarDef!\n" 
                             | Some c1 -> c1 := !c1 - 1
                         end
-                        else ()  
-            | _ -> ()
-        done 
+                        else Util.insertBack newarr comm
+            | _ -> Util.insertBack newarr comm
+        done; 
+        data := !newarr
     in
 
     let elimVarIfNoUse = 
         fun ~key ~data -> (* key:varName, data: ref int *)
         if !data = 0 then
         begin
+            data := -1;
             hasDeleted := true;
             Hashtbl.iteri funNodes (deleteVarDef key)
         end
@@ -226,8 +224,9 @@ let deadCodeElimForFunc =
     in
 
     makeVarUse ();
-    elim ()
-
+    while !hasDeleted = true do
+        elim ()
+    done
 
 
 let performDeadCodeElim = 
