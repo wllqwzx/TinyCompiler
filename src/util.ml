@@ -19,13 +19,13 @@ let insertBack =
     let tt = Array.append !refarr [|v|] in
     refarr := tt
 
-(*
+
 let dropAt =
-    fun arr pos ->
-    let pre = Array.sub arr 0 pos in
-    let post = Array.sub arr (pos + 1) ((Array.length arr) - (pos + 1)) in
-    Array.append pre post
-*)
+    fun refarr pos ->
+    let pre = Array.sub !refarr 0 pos in
+    let post = Array.sub !refarr (pos + 1) ((Array.length !refarr) - (pos + 1)) in
+    refarr := Array.append pre post
+
 
 
 (*---------------------------------------- *)

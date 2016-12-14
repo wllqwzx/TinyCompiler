@@ -10,6 +10,7 @@ open IrAst
 open IrGen
 open Cfg
 open ToSSA
+open DeadCodeElim
 
 let ast =
     match In_channel.input_line stdin with (* read from terminal, we modify it to read from a file *)
@@ -223,5 +224,8 @@ let _ = print_pgm ast;
         makeCFG ir_ast;
         makeFatherArray ();
         transToSSA ();
+        Cfg.print_CFG ();
+        print_string "--------------codeElim\n";
+        performDeadCodeElim ();
         Cfg.print_CFG ()
 (* ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core src/testParser.native *)
