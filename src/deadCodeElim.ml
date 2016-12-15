@@ -231,4 +231,4 @@ let deadCodeElimForFunc =
 
 let performDeadCodeElim = 
     fun () -> 
-    Hashtbl.iteri Cfg.funcHtb deadCodeElimForFunc 
+    Hashtbl.iteri Cfg.funcHtb deadCodeElimForFunc

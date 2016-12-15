@@ -34,3 +34,8 @@ int main(){
 
 
 int main(a:int, b:int){ a = add(a,1); b = add(b,1); if(lt(a,b)){a = mul(a,2); return a}else{b = mul(b,2); return b}}
+
+
+
+
+int main(a:int, b:int){ int i = a; int flag = true; int sum = 0; while(lt(i,b)){ if(flag){ sum = add(sum,i); flag = false }else{ sum = mul(sum,i); flag = true }; i = add(i,1) }; return sum }
