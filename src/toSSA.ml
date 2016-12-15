@@ -121,13 +121,13 @@ let addPhiFunc =
         for i = 0 to (Array.length !node) - 1 do
             let comm = !node.(i) in
             match comm with
-            | Ir_assign (str, (Ir_Phi (str1, str2))) -> if (String.compare str varName) = 0 
+            | Ir_assign (str, (Ir_Phi ((Ir_var str1), (Ir_var str2)))) -> if (String.compare str varName) = 0 
                                                        then hasAppear := true else ()
             | othercomm -> ();
         done;
         if !hasAppear = true
         then ()
-        else Util.insertFront node (Ir_assign (varName, (Ir_Phi (varName, varName))))
+        else Util.insertFront node (Ir_assign (varName, (Ir_Phi ((Ir_var varName), (Ir_var varName)))))
     in
     let addPhiForVar = 
         fun ~key ~data ->
@@ -195,7 +195,7 @@ let reName =
                             let s = !commarr.(i) in
                             begin
                             match s with (* remane vars been used *)
-                            | Ir_assign (str, (Ir_Phi (str1, str2))) -> () 
+                            | Ir_assign (str, (Ir_Phi ((Ir_var str1), (Ir_var str2)))) -> () 
                             | Ir_assign (str, (Ir_var str1)) -> let Some stk = Hashtbl.find funcVarStack str1 in
                                                                let Some ii = Stack.top stk in
                                                                let n_str1 = str1 ^ "_" ^ (string_of_int ii) in
@@ -274,17 +274,17 @@ let reName =
                                         let comm = !commarrOfI.(comid) in
                                         begin
                                         match comm with
-                                        | Ir_assign (str, (Ir_Phi (str1, str2))) -> 
+                                        | Ir_assign (str, (Ir_Phi ((Ir_var str1), (Ir_var str2)))) -> 
                                                 if !th = 0 then
                                                     let Some stk = Hashtbl.find funcVarStack str1 in
                                                     let Some ii = Stack.top stk in
                                                     let n_str1 = str1 ^ "_" ^ (string_of_int ii) in
-                                                    Array.set !commarrOfI comid (Ir_assign (str, (Ir_Phi (n_str1, str2))))
+                                                    Array.set !commarrOfI comid (Ir_assign (str, (Ir_Phi ((Ir_var n_str1), (Ir_var str2)))))
                                                 else if !th = 1 then
                                                         let Some stk = Hashtbl.find funcVarStack str2 in
                                                         let Some ii = Stack.top stk in
                                                         let n_str2 = str2 ^ "_" ^ (string_of_int ii) in
-                                                        Array.set !commarrOfI comid (Ir_assign (str, (Ir_Phi (str1, n_str2))))
+                                                        Array.set !commarrOfI comid (Ir_assign (str, (Ir_Phi ((Ir_var str1), (Ir_var n_str2)))))
                                                      else print_string "error 3 in reNameNode!" 
                                         | _ -> ()
                                         end

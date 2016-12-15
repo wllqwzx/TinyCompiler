@@ -119,7 +119,7 @@ let rec print_irexp =
     | Ir_var str            -> print_string str
     | Ir_biop (e1, op, e2)  -> print_irexp e1; print_op op; print_irexp e2
     | Ir_call name          -> print_string ("call " ^ name)
-    | Ir_Phi (str1, str2)   -> print_string ("Phi(" ^ str1 ^ ", " ^ str2 ^ ")")
+    | Ir_Phi (e1, e2)       -> print_string "Phi("; print_irexp e1; print_string ", "; print_irexp e2; print_string ")"
 
 
 let print_Id_Block =

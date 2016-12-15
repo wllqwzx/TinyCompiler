@@ -12,7 +12,7 @@ let deadCodeElimForFunc =
         for i = 0 to (Array.length !data) - 1 do
             let comm = !data.(i) in
             match comm with
-            | Ir_assign (str, (Ir_Phi (str1, str2))) -> 
+            | Ir_assign (str, (Ir_Phi ((Ir_var str1), (Ir_var str2)))) -> 
                         let c0opt = Hashtbl.find varUse str in
                         begin
                         match c0opt with
@@ -149,7 +149,7 @@ let deadCodeElimForFunc =
                             | Some c1 -> c1 := !c1 - 1
                             end
                         else Util.insertBack newarr comm
-            | Ir_assign (str, (Ir_Phi (str1, str2))) -> 
+            | Ir_assign (str, (Ir_Phi ((Ir_var str1), (Ir_var str2)))) -> 
                         if (String.compare str var) = 0 then
                         begin
                             let c1opt = Hashtbl.find varUse str1 in

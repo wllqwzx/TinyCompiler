@@ -159,8 +159,8 @@ let rec print_irexp =
     | Ir_var str            -> print_string str
     | Ir_biop (e1, op, e2)  -> print_irexp e1; print_op op; print_irexp e2
     | Ir_call name          -> print_string ("call " ^ name)
-    | Ir_Phi (str1, str2)   -> print_string ("Phi(" ^ str1 ^ ", " ^ str2 ^ ")")
-
+    | Ir_Phi ((Ir_var str1), (Ir_var str2))   -> print_string ("Phi(" ^ str1 ^ ", " ^ str2 ^ ")")
+    | _ -> print_string "error in testParser:print_irexp!\n"
 
 let print_ircomm =
     fun ircomm ->
