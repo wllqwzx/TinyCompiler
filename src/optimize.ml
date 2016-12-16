@@ -284,7 +284,7 @@ let scanCommArr =
 let optimizeFunc =
     fun ~key ~data -> (* key:funName, data:lid ---> ref arr *)
     Hashtbl.iteri data (scanCommArr data)
-
+ 
 
 let performOptimizationOverSSA = 
     fun () ->

@@ -98,6 +98,7 @@ let getDomTree =
 let addPhiFunc = 
     fun nodeHtb domFrt ->
     let defSite = Hashtbl.create ~hashable:String.hashable () in
+    let useSite = Hashtbl.create ~hashable:String.hashable () in
     let addVarToDefSite =
         fun varName site ->
         let arrRefOpt = Hashtbl.find defSite varName in
@@ -115,6 +116,33 @@ let addPhiFunc =
             | _ -> () 
         done        
     in
+    let rec addVarInExpToUseSite =
+        fun exp site ->
+        match exp with
+        | Ir_var    str -> 
+               let arrRefOpt = Hashtbl.find useSite str in
+               begin
+                    match arrRefOpt with
+                    | None -> Hashtbl.add useSite str (ref [|site|]); ()
+                    | Some arrRef -> Util.insertBack arrRef site 
+                end
+        | Ir_biop   (exp1, op, exp2) -> addVarInExpToUseSite exp1 site; addVarInExpToUseSite exp2 site
+        | Ir_Phi    (exp1, exp2) -> addVarInExpToUseSite exp1 site; addVarInExpToUseSite exp2 site
+        | _ -> ()
+    in
+    let addToUseSite =
+        fun ~key ~data ->
+        for i = 0 to (Array.length !data) - 1 do
+            let comm = !data.(i) in
+            match comm with
+            | Ir_assign (str, exp) -> addVarInExpToUseSite exp key
+            | Ir_ifz    (exp, lid) -> addVarInExpToUseSite exp key
+            | Ir_push   exp -> addVarInExpToUseSite exp key
+            | Ir_print  exp -> addVarInExpToUseSite exp key
+            | Ir_ret    exp -> addVarInExpToUseSite exp key
+            | _ -> ()
+        done
+    in
     let addVarPhiToNode = 
         fun varName node -> 
         let hasAppear = ref false in
@@ -130,22 +158,40 @@ let addPhiFunc =
         else Util.insertFront node (Ir_assign (varName, (Ir_Phi ((Ir_var varName), (Ir_var varName)))))
     in
     let addPhiForVar = 
-        fun ~key ~data ->
-        for i = 0 to (Array.length !data) - 1 do
-            let site = !data.(i) in
-            let siteDomFtr = Hashtbl.find domFrt site in
-            match siteDomFtr with
-            | None -> print_string "impossible!"
-            | Some arrRef -> for j = 0 to (Array.length !arrRef) - 1 do
-                                let t = !arrRef.(j) in
-                                let curNodeOpt = Hashtbl.find nodeHtb t in
-                                match curNodeOpt with
-                                | None -> print_string "impossible!"
-                                | Some curNode -> addVarPhiToNode key curNode
-                            done 
-        done
+        fun ~key ~data -> (* key:varName, data:def sites *)
+        let len = Array.length !data in
+        let allsame = ref false in
+        if len = 1 then
+            let def = !data.(0) in
+            let Some uses = Hashtbl.find useSite key in
+            let hasdiff = ref false in
+            for p = 0 to (Array.length !uses) - 1 do
+                let ause = !uses.(p) in
+                if ause = def then ()
+                else hasdiff := true
+            done;
+            if !hasdiff = false then
+                allsame := true
+            else ()
+        else ();  
+        if !allsame = false then
+            for i = 0 to (Array.length !data) - 1 do
+                let site = !data.(i) in
+                let siteDomFtr = Hashtbl.find domFrt site in
+                match siteDomFtr with
+                | None -> print_string "impossible!"
+                | Some arrRef -> for j = 0 to (Array.length !arrRef) - 1 do
+                                    let t = !arrRef.(j) in
+                                    let curNodeOpt = Hashtbl.find nodeHtb t in
+                                    match curNodeOpt with
+                                    | None -> print_string "impossible!"
+                                    | Some curNode -> addVarPhiToNode key curNode
+                                done 
+            done
+        else ()
     in
     Hashtbl.iteri nodeHtb addToDefSite; (* defSite finished! *)
+    Hashtbl.iteri nodeHtb addToUseSite;
     Hashtbl.iteri defSite addPhiForVar
 
 
@@ -368,6 +414,8 @@ let transFuncToSSA =
                      print_newline ();
                      Hashtbl.iteri domTree showDomTree; 
                      (* debug ----- end *)
+                     addPhiFunc data domFrt;
+                     addPhiFunc data domFrt;
                      addPhiFunc data domFrt;
                      reName data startNode domTree edgeMat fatherArrayInFunc
     | None -> print_string "impossible!"   
