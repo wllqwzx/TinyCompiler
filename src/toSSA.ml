@@ -163,16 +163,21 @@ let addPhiFunc =
         let allsame = ref false in
         if len = 1 then
             let def = !data.(0) in
-            let Some uses = Hashtbl.find useSite key in
+            let usesOpt = Hashtbl.find useSite key in
             let hasdiff = ref false in
-            for p = 0 to (Array.length !uses) - 1 do
-                let ause = !uses.(p) in
-                if ause = def then ()
-                else hasdiff := true
-            done;
-            if !hasdiff = false then
-                allsame := true
-            else ()
+            match usesOpt with
+            | None -> allsame := true
+            | Some uses -> 
+                    begin
+                    for p = 0 to (Array.length !uses) - 1 do
+                        let ause = !uses.(p) in
+                        if ause = def then ()
+                        else hasdiff := true
+                    done;
+                    if !hasdiff = false then
+                        allsame := true
+                    else ()
+                    end
         else ();  
         if !allsame = false then
             for i = 0 to (Array.length !data) - 1 do
