@@ -102,43 +102,44 @@ let makeFatherArray = (* call after makeCFG *)
 
 (* ------- print cfg ------- *)
 let print_op =
-    fun op ->
+    fun op file ->
     match op with
-    | Add -> print_string " + "
-    | Sub -> print_string " - "
-    | Mul -> print_string " * "
-    | Div -> print_string " / "
-    | And -> print_string " && "
-    | Or  -> print_string " || "    
-    | Lt  -> print_string " < "
+    | Add -> fprintf file " + "
+    | Sub -> fprintf file " - "
+    | Mul -> fprintf file " * "
+    | Div -> fprintf file " / "
+    | And -> fprintf file " && "
+    | Or  -> fprintf file " || "    
+    | Lt  -> fprintf file " < "
 
 let rec print_irexp =
-    fun irexp ->
+    fun irexp file ->
     match irexp with
-    | Ir_constant num       -> print_int num 
-    | Ir_var str            -> print_string str
-    | Ir_biop (e1, op, e2)  -> print_irexp e1; print_op op; print_irexp e2
-    | Ir_call name          -> print_string ("call " ^ name)
-    | Ir_Phi (e1, e2)       -> print_string "Phi("; print_irexp e1; print_string ", "; print_irexp e2; print_string ")"
+    | Ir_constant num       -> fprintf file "%d" num 
+    | Ir_var str            -> fprintf file "%s" str
+    | Ir_biop (e1, op, e2)  -> print_irexp e1 file; print_op op file; print_irexp e2 file
+    | Ir_call name          -> fprintf file "%s" ("call " ^ name)
+    | Ir_Phi (e1, e2)       -> fprintf file "%s" "Phi("; print_irexp e1 file; fprintf file "%s" ", "; print_irexp e2 file; fprintf file ")"
 
 
 let print_Id_Block =
-    fun bid commarrRef ->
-    print_string ("\n _B" ^ (string_of_int bid) ^ ":\n");
+    fun bid commarrRef file ->
+    fprintf file "%s" ("\n _B" ^ (string_of_int bid) ^ ":\n");
     for i = 0 to (Array.length !commarrRef) - 1 do
         let comm = !commarrRef.(i) in
         match comm with
-        | Ir_label num           -> print_string ("_B" ^ (string_of_int num) ^ ":"); print_newline ()
-        | Ir_assign (str, irexp) -> print_string (str ^ " = "); print_irexp irexp; print_newline ()
-        | Ir_goto num            -> print_string ("goto _B" ^ (string_of_int num)); print_newline ()
-        | Ir_ifz (irexp, num)    -> print_string "ifz "; print_irexp irexp; print_string (" goto _B" ^ (string_of_int num) ^ ":"); print_newline ()  
-        | Ir_push irexp          -> print_string "push "; print_irexp irexp; print_newline ()
-        | Ir_pop str             -> print_string ("pop " ^ str); print_newline ()
-        | Ir_print irexp         -> print_string "print "; print_irexp irexp; print_newline ()
-        | Ir_ret irexp           -> print_string "ret "; print_irexp irexp; print_newline ()
+        | Ir_label num           -> fprintf file "%s" ("_B" ^ (string_of_int num) ^ ":"); fprintf file "\n"
+        | Ir_assign (str, irexp) -> fprintf file "%s" (str ^ " = "); print_irexp irexp file; fprintf file "\n"
+        | Ir_goto num            -> fprintf file "%s" ("goto _B" ^ (string_of_int num)); fprintf file "\n"
+        | Ir_ifz (irexp, num)    -> fprintf file "%s" "ifz "; print_irexp irexp file; fprintf file "%s" (" goto _B" ^ (string_of_int num) ^ ":"); fprintf file "\n"
+        | Ir_push irexp          -> fprintf file "%s" "push "; print_irexp irexp file; fprintf file "\n"
+        | Ir_pop str             -> fprintf file "%s" ("pop " ^ str); fprintf file "\n"
+        | Ir_print irexp         -> fprintf file "%s" "print "; print_irexp irexp file; fprintf file "\n"
+        | Ir_ret irexp           -> fprintf file "%s" "ret "; print_irexp irexp file; fprintf file "\n"
     done
 
 let print_func_seq = 
+    fun file -> 
     fun ~key ~data ->
     let baseBOpt = Hashtbl.find funcHtb key in
     match baseBOpt with
@@ -149,11 +150,13 @@ let print_func_seq =
                        begin
                        match commarrOpt with
                        | None -> print_string "impossible!"
-                       | Some commarrRef -> print_Id_Block bid commarrRef
+                       | Some commarrRef -> print_Id_Block bid commarrRef file
                        end   
                    done 
 
 
 let print_CFG = 
-    fun () -> 
-    Hashtbl.iteri nodeSeq print_func_seq
+    fun fileName -> 
+    let file = Out_channel.create fileName in
+    Hashtbl.iteri nodeSeq (print_func_seq file);
+    Out_channel.close file

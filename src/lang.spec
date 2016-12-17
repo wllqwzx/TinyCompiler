@@ -20,17 +20,7 @@ int arith(a:int, b:int, c:int){
     return t
 };
 
-int main(){
-    int t = max(3,5);
-    int i = arith(2,4,t);
-    i = add(i,1);
-    int j = 10;
-    while( or(0<j,i<j) ){
-        j = sub(j,1)
-    };
-    print(j);
-    return 0
-}
+
 
 
 int main(a:int, b:int){ a = add(a,1); b = add(b,1); if(lt(a,b)){a = mul(a,2); return a}else{b = mul(b,2); return b}}

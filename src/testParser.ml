@@ -13,7 +13,7 @@ open ToSSA
 open DeadCodeElim
 open Optimize
 open RemovePhi
-
+(*
 let ast =
     match In_channel.input_line stdin with (* read from terminal, we modify it to read from a file *)
     | None -> print_endline "\nGood bye."; exit 0
@@ -23,7 +23,18 @@ let ast =
                    with
                    | Lexer.LexerError str -> print_string str; exit 1
                    | Parser.Error -> print_string ("Oops!!! parser error with char: " ^ (Lexing.lexeme alexbuf)
-                                                     ^ " at: " ^ (Lexer.error_info alexbuf)); exit 1
+                                                     ^ " at: " ^ (Lexer.error_info alexbuf)); exit 1*)
+
+
+let getAst = 
+    fun str ->
+    let alexbuf = Lexing.from_string str in
+    try
+    Parser.enterPoint Lexer.read alexbuf
+    with
+    | Lexer.LexerError str -> print_string str; exit 1
+    | Parser.Error -> print_string ("Oops!!! parser error with char: " ^ (Lexing.lexeme alexbuf)
+                                        ^ " at: " ^ (Lexer.error_info alexbuf)); exit 1
 
 (* ---------- test parser ---------- *)
 
@@ -144,99 +155,121 @@ let print_pgm =
 (* --------------------------------------test irgen *)
 
 let print_op =
-    fun op ->
+    fun op file ->
     match op with
-    | Add -> print_string " + "
-    | Sub -> print_string " - "
-    | Mul -> print_string " * "
-    | Div -> print_string " / "
-    | And -> print_string " && "
-    | Or  -> print_string " || "    
-    | Lt  -> print_string " < "
+    | Add -> fprintf file " + "
+    | Sub -> fprintf file " - "
+    | Mul -> fprintf file " * "
+    | Div -> fprintf file " / "
+    | And -> fprintf file " && "
+    | Or  -> fprintf file " || "    
+    | Lt  -> fprintf file " < "
 
 let rec print_irexp =
-    fun irexp ->
+    fun irexp file ->
     match irexp with
-    | Ir_constant num       -> print_int num 
-    | Ir_var str            -> print_string str
-    | Ir_biop (e1, op, e2)  -> print_irexp e1; print_op op; print_irexp e2
-    | Ir_call name          -> print_string ("call " ^ name)
-    | Ir_Phi ((Ir_var str1), (Ir_var str2))   -> print_string ("Phi(" ^ str1 ^ ", " ^ str2 ^ ")")
+    | Ir_constant num       -> fprintf file "%d" num 
+    | Ir_var str            -> fprintf file "%s" str
+    | Ir_biop (e1, op, e2)  -> print_irexp e1 file; print_op op file; print_irexp e2 file
+    | Ir_call name          -> fprintf file "%s" ("call " ^ name)
+    | Ir_Phi ((Ir_var str1), (Ir_var str2))   -> fprintf file "%s" ("Phi(" ^ str1 ^ ", " ^ str2 ^ ")")
     | _ -> print_string "error in testParser:print_irexp!\n"
 
 let print_ircomm =
-    fun ircomm ->
+    fun ircomm file ->
     match ircomm with
-    | Ir_label num           -> print_string ("_B" ^ (string_of_int num) ^ ":"); print_newline ()
-    | Ir_assign (str, irexp) -> print_string (str ^ " = "); print_irexp irexp; print_newline ()
-    | Ir_goto num            -> print_string ("goto _B" ^ (string_of_int num)); print_newline ()
-    | Ir_ifz (irexp, num)    -> print_string "ifz "; print_irexp irexp; print_string (" goto _B" ^ (string_of_int num) ^ ":"); print_newline ()  
-    | Ir_push irexp          -> print_string "push "; print_irexp irexp; print_newline ()
-    | Ir_pop str             -> print_string ("pop " ^ str); print_newline ()
-    | Ir_print irexp         -> print_string "print "; print_irexp irexp; print_newline ()
-    | Ir_ret irexp           -> print_string "ret "; print_irexp irexp; print_newline () 
+    | Ir_label num           -> fprintf file "%s" ("_B" ^ (string_of_int num) ^ ":" ^ "\n");
+    | Ir_assign (str, irexp) -> fprintf file "%s" (str ^ " = "); print_irexp irexp file; fprintf file "\n"
+    | Ir_goto num            -> fprintf file "%s" ("goto _B" ^ (string_of_int num)); fprintf file "\n"
+    | Ir_ifz (irexp, num)    -> fprintf file "%s" "ifz "; print_irexp irexp file; print_string (" goto _B" ^ (string_of_int num) ^ ":"); fprintf file "\n"
+    | Ir_push irexp          -> fprintf file "%s" "push "; print_irexp irexp file; fprintf file "\n"
+    | Ir_pop str             -> fprintf file "%s" ("pop " ^ str); fprintf file "\n"
+    | Ir_print irexp         -> fprintf file "%s" "print "; print_irexp irexp file; fprintf file "\n"
+    | Ir_ret irexp           -> fprintf file "ret "; print_irexp irexp file; fprintf file "\n"
 
 let print_commarr = 
-    fun commarr ->
+    fun commarr file ->
     for i = 0 to (Array.length commarr) - 1 do
-        print_ircomm (Array.get commarr i)
+        print_ircomm (Array.get commarr i) file
     done
 
 let rec print_irparamli = 
-    fun irparamli ->
+    fun irparamli file ->
     match irparamli with
     | [] -> ()
-    | p::pl -> (print_string (p^" ")); print_irparamli pl
+    | p::pl -> (fprintf file "%s" (p^" ")); print_irparamli pl file
 
 let print_irfun =
-    fun irfun ->
+    fun irfun file ->
     match irfun with
-    | Ir_a_function (name, irparamli, commarr) -> (print_string name);
-                                               (print_string "( ");
-                                               (print_irparamli irparamli);
-                                               (print_string "){\n");
-                                               (print_commarr commarr);
-                                               (print_string "}\n")
+    | Ir_a_function (name, irparamli, commarr) -> (fprintf file "%s" name);
+                                               (fprintf file "( ");
+                                               (print_irparamli irparamli file);
+                                               (fprintf file "){\n");
+                                               (print_commarr commarr file);
+                                               (fprintf file "}\n")
 
 let rec print_irfunli =
-    fun irfunli ->
+    fun irfunli file ->
     match irfunli with
     | [] -> ()
-    | f::fl -> (print_irfun f); print_irfunli fl
+    | f::fl -> (print_irfun f file); print_irfunli fl file
 
 let print_ir = 
-    fun ir_pgm ->
+    fun ir_pgm irFileName ->
     match ir_pgm with
-    | Ir_a_program irfunli -> print_irfunli irfunli
+    | Ir_a_program irfunli -> 
+        let file = Out_channel.create irFileName in
+        print_irfunli irfunli file;
+        Out_channel.close file
 
 
 
 
 
+(* ----------------------------------------- driver *)
 
+let outPutAll = ref false
+let fileName = ref ""
 
-
-
-
-(* ----------------------------------------- *)
-let _ = print_pgm ast;
-        print_string "--------------IR:\n";
-        let ir_ast = irgen ast in
-        print_ir ir_ast;
-        makeCFG ir_ast;
-        makeFatherArray ();
-        transToSSA ();
-        Cfg.print_CFG ();
-        print_string "--------------codeElim\n";
-        performDeadCodeElim ();
-        Cfg.print_CFG ();
-        print_string "--------------optimize\n";
-        performOptimizationOverSSA ();
-        Cfg.print_CFG ();
-        print_string "--------------codeElim\n";
-        performDeadCodeElim ();
-        Cfg.print_CFG ();
-        print_string "--------------removePhi\n";
-        removePhi ();
-        Cfg.print_CFG ()
+let () =
+    let len = Array.length Sys.argv in
+    if len = 3 then
+        outPutAll := true
+    else ();
+    fileName := Sys.argv.(1);
+    let file = In_channel.create !fileName in
+    let str = In_channel.input_all file in
+    In_channel.close file;
+    let ast = getAst str in
+    (*print_pgm ast;*)
+    (*print_string "--------------IR:\n";*)
+    let ir_ast = irgen ast in
+    if !outPutAll = true then
+        print_ir ir_ast (!fileName ^ ".IR")
+    else ();
+    (*print_string "--------------SSA:\n";*)
+    makeCFG ir_ast;
+    makeFatherArray ();
+    transToSSA ();
+    if !outPutAll = true then
+        Cfg.print_CFG (!fileName ^ ".SSA")
+    else ();
+    
+    (*print_string "--------------codeElim\n";*)
+    performDeadCodeElim ();
+    if !outPutAll = true then
+        Cfg.print_CFG (!fileName ^ ".ELIM")
+    else ();
+    (*print_string "--------------optimize\n";*)
+    performOptimizationOverSSA ();
+    (*Cfg.print_CFG (!fileName ^ ".SSA");*)
+    (*print_string "--------------codeElim\n";*)
+    performDeadCodeElim ();
+    if !outPutAll = true then
+        Cfg.print_CFG (!fileName ^ ".OPT")
+    else ();
+    (*print_string "--------------removePhi\n";*)
+    removePhi ();
+    Cfg.print_CFG (!fileName ^ ".FINAL")
 (* ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core src/testParser.native *)

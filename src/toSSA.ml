@@ -411,14 +411,16 @@ let transFuncToSSA =
                      let (startNode, domTree) = getDomTree () in
                      let Some fatherArrayInFunc = Hashtbl.find fatherArray key in
                      (* debug ------ start *)
-                     print_string "\n ------------------- domFrt \n";
+                     (*print_string "\n ------------------- domFrt \n";
                      Hashtbl.iteri domFrt showDomFtr; 
                      print_string "\n ------------------- domTree \n";
                      print_string "start node is: ";
                      print_int startNode;
                      print_newline ();
-                     Hashtbl.iteri domTree showDomTree; 
+                     Hashtbl.iteri domTree showDomTree; *)
                      (* debug ----- end *)
+                     addPhiFunc data domFrt;
+                     addPhiFunc data domFrt;
                      addPhiFunc data domFrt;
                      addPhiFunc data domFrt;
                      addPhiFunc data domFrt;

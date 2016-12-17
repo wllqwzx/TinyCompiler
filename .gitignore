@@ -20,3 +20,13 @@ setup.data
 setup.log
 
 a.out
+
+*.ELIM
+
+*.FINAL
+
+*.IR
+
+*.OPT
+
+*.SSA
