@@ -272,4 +272,5 @@ let () =
     (*print_string "--------------removePhi\n";*)
     removePhi ();
     Cfg.print_CFG (!fileName ^ ".FINAL")
-(* ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core src/testParser.native *)
+
+(* ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core src/compile.native *)
