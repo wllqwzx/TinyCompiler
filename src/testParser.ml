@@ -12,6 +12,7 @@ open Cfg
 open ToSSA
 open DeadCodeElim
 open Optimize
+open RemovePhi
 
 let ast =
     match In_channel.input_line stdin with (* read from terminal, we modify it to read from a file *)
@@ -234,5 +235,8 @@ let _ = print_pgm ast;
         Cfg.print_CFG ();
         print_string "--------------codeElim\n";
         performDeadCodeElim ();
+        Cfg.print_CFG ();
+        print_string "--------------removePhi\n";
+        removePhi ();
         Cfg.print_CFG ()
 (* ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core src/testParser.native *)
