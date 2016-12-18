@@ -11,19 +11,19 @@ type op =
 type irexp = 
     | Ir_constant  of int 
     | Ir_var       of string
-    | Ir_biop      of irexp * op * irexp (* only: constant or var *)
-    | Ir_call      of string (* funName *)
+    | Ir_biop      of irexp * op * irexp 
+    | Ir_call      of string 
     | Ir_Phi       of irexp * irexp
 
 type command = 
     | Ir_label  of int
     | Ir_assign of string * irexp
-    | Ir_goto   of int  (* label *)
-    | Ir_ifz    of irexp * int (* only: constant or var *) (* label *)
-    | Ir_push   of irexp (* only: constant or var *)
+    | Ir_goto   of int  
+    | Ir_ifz    of irexp * int 
+    | Ir_push   of irexp 
     | Ir_pop    of string
-    | Ir_print  of irexp (* only: constant or var *)
-    | Ir_ret    of irexp (* only: constant or var *)
+    | Ir_print  of irexp 
+    | Ir_ret    of irexp 
 
 (*
 type basicblock =   (* label *)
