@@ -162,7 +162,10 @@ let rec irgen_commli =
                                                let tvar = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
                                                let tt1 = Array.append tt [|(Ir_print tvar)|] in
                                                irgen_commli cli tt1
-    | (Return_stat  exp)::cli              ->   let tt = Array.append arr (irgen_exp exp) in
+    | (Return_stat  exp)::cli              ->  let lb1 = getLabel () in
+                                               let ttx = Array.append arr [|(Ir_goto lb1)|] in
+                                               let tt0 = Array.append ttx [|(Ir_label lb1)|] in 
+                                               let tt = Array.append tt0 (irgen_exp exp) in
                                                let tvar = Ir_var ("_t" ^ (string_of_int !tempVarId)) in
                                                let tt1 = Array.append tt [|(Ir_ret tvar)|] in
                                                irgen_commli cli tt1

@@ -181,7 +181,7 @@ let print_ircomm =
     | Ir_label num           -> fprintf file "%s" ("_B" ^ (string_of_int num) ^ ":" ^ "\n");
     | Ir_assign (str, irexp) -> fprintf file "%s" (str ^ " = "); print_irexp irexp file; fprintf file "\n"
     | Ir_goto num            -> fprintf file "%s" ("goto _B" ^ (string_of_int num)); fprintf file "\n"
-    | Ir_ifz (irexp, num)    -> fprintf file "%s" "ifz "; print_irexp irexp file; print_string (" goto _B" ^ (string_of_int num) ^ ":"); fprintf file "\n"
+    | Ir_ifz (irexp, num)    -> fprintf file "%s" "ifz "; print_irexp irexp file; fprintf file "%s" (" goto _B" ^ (string_of_int num) ^ ":"); fprintf file "\n"
     | Ir_push irexp          -> fprintf file "%s" "push "; print_irexp irexp file; fprintf file "\n"
     | Ir_pop str             -> fprintf file "%s" ("pop " ^ str); fprintf file "\n"
     | Ir_print irexp         -> fprintf file "%s" "print "; print_irexp irexp file; fprintf file "\n"
@@ -272,5 +272,6 @@ let () =
     (*print_string "--------------removePhi\n";*)
     removePhi ();
     Cfg.print_CFG (!fileName ^ ".FINAL")
+
 
 (* ocamlbuild -use-menhir -tag thread -use-ocamlfind -quiet -pkg core src/compile.native *)
