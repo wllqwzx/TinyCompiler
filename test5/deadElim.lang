@@ -1,0 +1,12 @@
+int main(a:int){
+	if(lt(a,10)){
+		a = add(a,5);
+		int b = mul(a,2);
+		int c = add(a,b)
+	}else{
+		a = sub(a,10);
+		int b = mul(a,2);
+		int c = add(a,b)
+	};
+	return a
+}

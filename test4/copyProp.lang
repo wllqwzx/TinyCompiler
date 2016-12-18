@@ -1,0 +1,7 @@
+int main(a:int){
+	int b = a;
+	int c = b;
+	int d = c;
+	int e = d;
+	return e
+}

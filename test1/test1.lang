@@ -1,8 +1,18 @@
-int func(a:int){ 
-	while(lt(a,10)){ 
-		a = add(a,5) 
-	}; 
-	return a 
+int min(a:int, b:int){
+	if(lt(a,b)){
+		return a
+	}else{
+		return b
+	}
+};
+
+
+int max(a:int, b:int){
+	if(lt(a,b)){
+		return b
+	}else{
+		return a
+	}
 };
 
 
@@ -14,10 +24,13 @@ int main(a:int, b:int){
 			sum = add(sum,2); 
 			flag = false 
 		} else { 
-			sum = mul(sum,2); 
+			sum = mul(sum,5); 
 			flag = true 
 		}; 
 		a = add(a, 1) 
 	}; 
-	return sum 
+
+	int res = max(sum,50);
+	res = min(res,10);
+	return res
 }

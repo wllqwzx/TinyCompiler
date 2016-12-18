@@ -1,0 +1,15 @@
+int main(a:int, b:int){ 
+	int x = a; 
+	int y = b; 
+	int z = 0; 
+	while(lt(x,y)){ 
+		if(lt(x,50)){ 
+			z = add(z,x) 
+		}else{ 
+			z = mul(z,y) 
+		}; 
+		x = add(x,5); 
+		int t = add(x,y) 
+	}; 
+	return z 
+}
