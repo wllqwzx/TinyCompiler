@@ -1,7 +1,7 @@
 int main(a:int, b:int){ 
 	int x = a; 
 	int y = b; 
-	int z = 0; 
+	int z = add(a,b); 
 	while(lt(x,y)){ 
 		if(lt(x,50)){ 
 			z = add(z,x) 
