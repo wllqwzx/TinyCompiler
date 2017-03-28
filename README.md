@@ -60,7 +60,7 @@ make
 运行代码：
 
 编译之后会在工程目录下产生一个 compile.native 的二进制可执行文件，该文件就是编译器，
-在工程目录下面提供了5个测试样例，分别在test1, test2, ... test5目录下面，下面我们以test1为例：
+在工程目录下面提供了5个测试样例，分别在test目录下面，下面我们以test1为例：
 
 test下的test1.lang是本项目所定义的语言的源代码文件，运行下面这行命令会在test目录下产生一个名为test1.lang.FINAL的文件，它是源文件经过编译和优化之后产生的最终结果(中间代码)：
 ./compile.native test/test1.lang
